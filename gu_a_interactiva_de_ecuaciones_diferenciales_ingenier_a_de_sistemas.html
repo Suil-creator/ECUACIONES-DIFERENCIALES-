@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiffEq.workstation | Formulario y Diagnóstico - Ing. de Sistemas</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        cobalt: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        ink: {
+                            900: '#0F172A',
+                            950: '#070B14',
+                        },
+                        ambertech: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- KaTeX for crisp mathematical typesetting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Technical Blueprint Engineering Grid Background */
+        .blueprint-bg {
+            background-color: #F8FAFC;
+            background-image: 
+                linear-gradient(to right, rgba(29, 78, 216, 0.045) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(29, 78, 216, 0.045) 1px, transparent 1px),
+                linear-gradient(to right, rgba(29, 78, 216, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(29, 78, 216, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+        }
+
+        .dark .blueprint-bg {
+            background-color: #070B14;
+            background-image: 
+                linear-gradient(to right, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+                linear-gradient(to right, rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px, 24px 24px, 120px 120px, 120px 120px;
+        }
+
+        /* Custom subtle scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.25);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.45);
+        }
+
+        /* Hide horizontal scrollbar on nav pills while keeping scroll */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* KaTeX responsiveness */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0.4rem 0;
+            margin: 0.35rem 0 !important;
+        }
+
+        /* Highlight pulse animation when jumped to from Diagnostic Assistant */
+        @keyframes targetPulse {
+            0% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0.5); border-color: #1D4ED8; }
+            70% { box-shadow: 0 0 0 12px rgba(29, 78, 216, 0); border-color: #1D4ED8; }
+            100% { box-shadow: 0 0 0 0 rgba(29, 78, 216, 0); }
+        }
+        .card-highlight {
+            animation: targetPulse 1.8s ease-out;
+        }
+    </style>
+</head>
+<body class="blueprint-bg text-ink-900 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-cobalt-700 selection:text-white">
+
+    <!-- Floating Toast Feedback -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5 bg-ink-900 dark:bg-cobalt-700 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 dark:border-cobalt-500 text-xs font-mono">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toast-message">¡Código LaTeX copiado!</span>
+    </div>
+
+    <!-- Top Workstation Header (Sticky) -->
+    <header class="sticky top-0 z-30 bg-white/95 dark:bg-ink-950/95 backdrop-blur-md border-b border-slate-200/90 dark:border-slate-800 shadow-2xs">
+        <!-- Upper Bar: Brand, Global Search (Ctrl+K), Diagnostic CTA, Mastery Progress & Theme -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- Brand Identity -->
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-cobalt-700 text-white flex items-center justify-center font-mono font-bold text-sm shadow-sm border border-cobalt-800">
+                    ∂/∂x
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-extrabold text-base sm:text-lg tracking-tight text-ink-900 dark:text-white leading-none">
+                            DiffEq<span class="text-cobalt-700 dark:text-cobalt-500">.workstation</span>
+                        </h1>
+                        <span class="hidden sm:inline-block text-[10px] font-mono font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                            SYS-ENG
+                        </span>
+                    </div>
+                    <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
+                        Manual Técnico & Diagnóstico de Ecuaciones Diferenciales
+                    </p>
+                </div>
+            </div>
+
+            <!-- Global Search Input with Ctrl+K -->
+            <div class="order-3 md:order-2 w-full md:w-auto md:flex-1 md:max-w-md lg:max-w-lg">
+                <div class="relative flex items-center">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none"></i>
+                    <input 
+                        type="text" 
+                        id="global-search" 
+                        placeholder="Buscar método, fórmula, trampa o palabra clave..." 
+                        class="w-full pl-10 pr-20 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300/80 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-cobalt-700/30 focus:border-cobalt-700 dark:focus:border-cobalt-500 text-ink-900 dark:text-slate-100 placeholder-slate-400 transition-all"
+                    >
+                    <div class="absolute right-2.5 flex items-center gap-1.5">
+                        <button id="clear-search-btn" class="hidden p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200" title="Limpiar búsqueda">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <kbd class="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-2xs">
+                            Ctrl K
+                        </kbd>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Controls: Diagnostic Wizard Button, Study Progress & Theme -->
+            <div class="order-2 md:order-3 flex items-center gap-2 sm:gap-3">
+                <!-- Diagnostic Assistant Trigger -->
+                <button 
+                    id="open-diagnostic-btn"
+                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-cobalt-700 hover:bg-cobalt-800 active:scale-[0.99] text-white text-xs sm:text-sm font-semibold shadow-sm transition-all cursor-pointer"
+                >
+                    <i data-lucide="compass" class="w-4 h-4 text-amber-300"></i>
+                    <span>Diagnóstico Rápido</span>
+                </button>
+
+                <!-- Mastery Progress Pill -->
+                <div class="hidden xl:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800" title="Progreso de temas marcados como Dominados">
+                    <div class="text-right">
+                        <div class="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 leading-none">Dominado</div>
+                        <div id="mastery-text" class="text-xs font-mono font-bold text-ink-900 dark:text-white mt-0.5">0 / 22</div>
+                    </div>
+                    <div class="w-16 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div id="mastery-bar" class="h-full bg-emerald-600 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Focus Filter Toggle (Hide/Show Mastered) -->
+                <button 
+                    id="focus-filter-btn"
+                    class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cobalt-700/50 hover:text-cobalt-700 dark:hover:text-cobalt-400 transition-colors"
+                    title="Modo Enfoque: Ocultar temas ya dominados"
+                >
+                    <i data-lucide="eye" id="focus-icon" class="w-4 h-4"></i>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button 
+                    id="theme-toggle"
+                    class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-cobalt-700/50 hover:text-cobalt-700 dark:hover:text-cobalt-400 transition-colors"
+                    title="Alternar modo claro / oscuro"
+                >
+                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Lower Bar: Horizontal Unit Navigation Pills -->
+        <div class="border-t border-slate-200/70 dark:border-slate-800/80 bg-slate-50/80 dark:bg-ink-900/60">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav id="unit-pills" class="flex items-center gap-1.5 py-2.5 overflow-x-auto no-scrollbar" aria-label="Unidades del curso">
+                    <!-- Populated via JS -->
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Interactive Diagnostic Assistant Modal -->
+    <div id="diagnostic-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-ink-950/60 backdrop-blur-xs">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 bg-ink-900 text-white flex items-center justify-between border-b border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-1.5 rounded-lg bg-cobalt-700 text-amber-300">
+                        <i data-lucide="git-fork" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-sm sm:text-base tracking-tight">Asistente de Diagnóstico de Ecuaciones</h2>
+                        <p class="text-[11px] font-mono text-slate-400">Identifica la estructura de tu ejercicio en 3 clics</p>
+                    </div>
+                </div>
+                <button id="close-diagnostic-btn" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Dynamic Decision Tree) -->
+            <div id="diagnostic-body" class="p-6 overflow-y-auto space-y-5">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-3.5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <button id="diagnostic-reset-btn" class="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-slate-600 dark:text-slate-400 hover:text-cobalt-700 dark:hover:text-cobalt-400">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                    <span>Reiniciar árbol de decisión</span>
+                </button>
+                <span class="text-[11px] font-mono text-slate-400">Esc para cerrar</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Workstation Canvas (100% Width Bento Grid) -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        
+        <!-- Mobile / Tablet Compact Progress Bar -->
+        <div class="xl:hidden mb-6 p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4 shadow-2xs">
+            <div class="flex items-center gap-2.5">
+                <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
+                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Progreso de Estudio:</span>
+                <span id="mastery-text-mobile" class="text-xs font-mono font-bold text-cobalt-700 dark:text-cobalt-400">0 / 22</span>
+            </div>
+            <div class="flex-1 max-w-xs h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div id="mastery-bar-mobile" class="h-full bg-emerald-600 transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Active Unit Banner / Header -->
+        <div id="unit-banner" class="mb-7">
+            <!-- Populated via JS -->
+        </div>
+
+        <!-- Bento Grid of Interactive Study Cards -->
+        <div id="bento-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <!-- Populated via JS -->
+        </div>
+
+        <!-- Empty State when Search or Focus Filter yields 0 results -->
+        <div id="empty-state" class="hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center max-w-lg mx-auto my-8 shadow-xs">
+            <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="filter-x" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-base font-bold text-ink-900 dark:text-white mb-1">Sin coincidencias en la vista actual</h3>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mb-5">
+                No hay fichas que coincidan con tu búsqueda o tienes activado el filtro de temas pendientes.
+            </p>
+            <button id="reset-filters-btn" class="px-4 py-2 rounded-xl bg-cobalt-700 hover:bg-cobalt-800 text-white text-xs font-semibold transition-colors">
+                Restablecer filtros y búsqueda
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Workstation Footer -->
+    <footer class="border-t border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-ink-950/80 backdrop-blur-xs mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-mono text-slate-500 dark:text-slate-400">
+            <div>DiffEq.workstation // Ingeniería de Sistemas</div>
+            <div class="flex items-center gap-4">
+                <span>6 Unidades</span>
+                <span>•</span>
+                <span>22 Métodos & Modelos</span>
+                <span>•</span>
+                <span>KaTeX Engine</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Complete Curriculum Data & Workstation Engine -->
+    <script>
+        const syllabusData = [
+            // =========================================================================
+            // UNIDAD 1: EDO DE PRIMER ORDEN
+            // =========================================================================
+            {
+                id: "u1",
+                code: "U01",
+                title: "EDO de Primer Orden",
+                shortTitle: "01. EDO 1er Orden",
+                description: "Técnicas analíticas fundamentales para ecuaciones diferenciales ordinarias de la forma F(x, y, y') = 0.",
+                cards: [
+                    {
+                        id: "u1-separables",
+                        title: "Variables Separables",
+                        tag: "Orden 1 • Directo",
+                        identification: "El lado derecho se factoriza exactamente como un producto g(x)·h(y).",
+                        prerequisites: [
+                            "Reescribir y' como el cociente de diferenciales dy/dx.",
+                            "Despejar todos los factores con 'y' hacia el diferencial dy, y los de 'x' hacia dx.",
+                            "Dominar técnicas básicas de integración (sustitución simple, fracciones parciales).",
+                            "Evaluar la condición inicial y(x₀) = y₀ inmediatamente después de integrar para hallar C."
+                        ],
+                        formulas: [
+                            {
+                                label: "Forma Canónica y Solución Implícita",
+                                latex: "\\frac{dy}{dx} = g(x)h(y) \\implies \\int \\frac{1}{h(y)}\\,dy = \\int g(x)\\,dx + C"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Resolver el PVI: \\quad \\frac{dy}{dx} = \\frac{x^2}{1 - y^2}, \\quad y(0) = 2",
+                            steps: [
+                                { text: "Separar variables multiplicando cruzado:", math: "(1 - y^2)\\,dy = x^2\\,dx" },
+                                { text: "Integrar ambos miembros respecto a su variable:", math: "\\int (1 - y^2)\\,dy = \\int x^2\\,dx \\implies y - \\frac{y^3}{3} = \\frac{x^3}{3} + C" },
+                                { text: "Aplicar condición inicial y(0) = 2 para hallar C:", math: "2 - \\frac{2^3}{3} = \\frac{0^3}{3} + C \\implies C = 2 - \\frac{8}{3} = -\\frac{2}{3}" },
+                                { text: "Multiplicar por 3 para limpiar denominadores:", math: "3y - y^3 = x^3 - 2" }
+                            ]
+                        },
+                        traps: [
+                            "Dividir entre h(y) puede eliminar soluciones constantes singulares (donde h(y) = 0). Verifica siempre si y = k constante satisface la EDO original.",
+                            "Olvidar la constante +C antes de aplicar propiedades de logaritmos o exponenciales (ej. e^(x + C) = C₁·e^x, no e^x + C)."
+                        ]
+                    },
+                    {
+                        id: "u1-homogeneas",
+                        title: "EDO Homogéneas (Grado n)",
+                        tag: "Orden 1 • Sustitución",
+                        identification: "Escrita como M(x,y)dx + N(x,y)dy = 0 donde M y N tienen el mismo grado total en cada término, o depende solo de (y/x).",
+                        prerequisites: [
+                            "Comprobar homogeneidad: M(tx, ty) = tⁿM(x,y) y N(tx, ty) = tⁿN(x,y).",
+                            "Elegir el cambio de variable más simple: y = ux (si N es más simple) o x = vy (si M es más simple).",
+                            "Recordar la regla del producto para el diferencial: dy = u·dx + x·du."
+                        ],
+                        formulas: [
+                            {
+                                label: "Transformación a Variables Separables",
+                                latex: "\\frac{dy}{dx} = F\\left(\\frac{y}{x}\\right) \\xrightarrow{y = ux} u + x\\frac{du}{dx} = F(u) \\implies \\int \\frac{du}{F(u) - u} = \\int \\frac{dx}{x} + C"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Resolver: \\quad (x^2 + y^2)\\,dx - xy\\,dy = 0",
+                            steps: [
+                                { text: "Ambos coeficientes son homogéneos de grado 2. Usamos y = ux, dy = u·dx + x·du:", math: "(x^2 + u^2 x^2)\\,dx - x(ux)(u\\,dx + x\\,du) = 0" },
+                                { text: "Dividir toda la ecuación entre x² (asumiendo x ≠ 0) y simplificar:", math: "(1 + u^2)\\,dx - u^2\\,dx - ux\\,du = 0 \\implies dx - ux\\,du = 0" },
+                                { text: "Separar variables e integrar:", math: "\\frac{dx}{x} = u\\,du \\implies \\ln|x| = \\frac{u^2}{2} + C" },
+                                { text: "Regresar a la variable original u = y/x:", math: "\\ln|x| = \\frac{y^2}{2x^2} + C \\implies y^2 = 2x^2(\\ln|x| - C)" }
+                            ]
+                        },
+                        traps: [
+                            "Olvidar sustituir también el diferencial dy por (u·dx + x·du) y dejar dy intacto.",
+                            "Entregar la respuesta final en términos de 'u' sin revertir el cambio u = y/x."
+                        ]
+                    },
+                    {
+                        id: "u1-exactas",
+                        title: "Exactas y Factor Integrante",
+                        tag: "Orden 1 • Diferencial Total",
+                        identification: "Forma M(x,y)dx + N(x,y)dy = 0. Si ∂M/∂y = ∂N/∂x es exacta; si difieren, busca un factor integrante μ(x) o μ(y).",
+                        prerequisites: [
+                            "Asegurar que todos los términos estén del mismo lado igualados a cero: M dx + N dy = 0.",
+                            "Calcular derivadas parciales cruzadas: My = ∂M/∂y y Nx = ∂N/∂x.",
+                            "Si no es exacta, calcular (My - Nx)/N; si depende solo de x, usar μ(x)."
+                        ],
+                        formulas: [
+                            {
+                                label: "Condición de Exactitud y Función Potencial",
+                                latex: "\\frac{\\partial M}{\\partial y} = \\frac{\\partial N}{\\partial x} \\implies f(x,y) = \\int M(x,y)\\,dx + g(y) = C"
+                            },
+                            {
+                                label: "Factores Integrantes Especiales",
+                                latex: "\\mu(x) = \\exp\\!\\left(\\int \\frac{M_y - N_x}{N}\\,dx\\right), \\qquad \\mu(y) = \\exp\\!\\left(\\int \\frac{N_x - M_y}{M}\\,dy\\right)"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Resolver: \\quad (2xy - \\tan y)\\,dx + (x^2 - x\\sec^2 y)\\,dy = 0",
+                            steps: [
+                                { text: "Verificar exactitud calculando My y Nx:", math: "M_y = 2x - \\sec^2 y, \\qquad N_x = 2x - \\sec^2 y \\quad (\\text{¡Exacta!})" },
+                                { text: "Integrar M(x,y) respecto a x manteniendo y constante:", math: "f(x,y) = \\int (2xy - \\tan y)\\,dx = x^2 y - x\\tan y + g(y)" },
+                                { text: "Derivar f(x,y) respecto a y e igualar a N(x,y):", math: "\\frac{\\partial f}{\\partial y} = x^2 - x\\sec^2 y + g'(y) = x^2 - x\\sec^2 y \\implies g'(y) = 0" },
+                                { text: "Integrar g'(y) = 0 → g(y) = K y escribir f(x,y) = C:", math: "x^2 y - x\\tan y = C" }
+                            ]
+                        },
+                        traps: [
+                            "Confundir los signos de N(x,y) cuando la ecuación viene escrita con un signo menos: M dx - N dy = 0 (el signo menos pertenece a N).",
+                            "Escribir y = f(x,y) como solución final en lugar de la curva de nivel implícita f(x,y) = C."
+                        ]
+                    },
+                    {
+                        id: "u1-lineal",
+                        title: "EDO Lineal de Primer Orden",
+                        tag: "Orden 1 • Clásico",
+                        identification: "La variable 'y' y su derivada 'y'' tienen exponente 1 y no hay productos entre ellas: a₁(x)y' + a₀(x)y = g(x).",
+                        prerequisites: [
+                            "Normalizar la ecuación dividiendo todo entre el coeficiente de y' para que quede y' + P(x)y = Q(x).",
+                            "Identificar P(x) incluyendo su signo negativo si lo tiene.",
+                            "Simplificar exponenciales y logaritmos en μ(x) usando e^(ln u) = u antes de integrar."
+                        ],
+                        formulas: [
+                            {
+                                label: "Forma Estándar, Factor Integrante y Solución",
+                                latex: "\\frac{dy}{dx} + P(x)y = Q(x), \\quad \\mu(x) = e^{\\int P(x)\\,dx} \\implies y(x) = \\frac{1}{\\mu(x)}\\left[\\int \\mu(x)Q(x)\\,dx + C\\right]"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Resolver: \\quad x\\frac{dy}{dx} - 4y = x^6 e^x",
+                            steps: [
+                                { text: "Dividir entre x para llevar a forma estándar (P(x) = -4/x):", math: "\\frac{dy}{dx} - \\frac{4}{x}y = x^5 e^x" },
+                                { text: "Calcular el factor integrante μ(x):", math: "\\mu(x) = e^{\\int -\\frac{4}{x}\\,dx} = e^{-4\\ln|x|} = x^{-4}" },
+                                { text: "Multiplicar la EDO estándar por x⁻⁴ (lado izquierdo es d/dx[x⁻⁴y]):", math: "\\frac{d}{dx}[x^{-4}y] = x^{-4}(x^5 e^x) = x e^x" },
+                                { text: "Integrar por partes (∫ x·e^x dx = x·e^x - e^x) y despejar y:", math: "x^{-4}y = x e^x - e^x + C \\implies y = x^5 e^x - x^4 e^x + C x^4" }
+                            ]
+                        },
+                        traps: [
+                            "Calcular μ(x) SIN haber dividido antes por el coeficiente principal a₁(x).",
+                            "Olvidar multiplicar la constante C por 1/μ(x) al despejar y(x) en el último paso."
+                        ]
+                    },
+                    {
+                        id: "u1-bernoulli",
+                        title: "Ecuación de Bernoulli",
+                        tag: "Orden 1 • No Lineal Reducible",
+                        identification: "Tiene la forma y' + P(x)y = Q(x)yⁿ con n ≠ 0 y n ≠ 1.",
+                        prerequisites: [
+                            "Llevar a la forma estándar de Bernoulli identificando P(x), Q(x) y el exponente n (puede ser negativo o fraccionario).",
+                            "Definir la sustitución u = y^(1-n).",
+                            "Derivar: du/dx = (1 - n)y^(-n) dy/dx para reemplazar directamente en la ecuación."
+                        ],
+                        formulas: [
+                            {
+                                label: "Reducción de Bernoulli a Lineal",
+                                latex: "\\frac{dy}{dx} + P(x)y = Q(x)y^n \\xrightarrow{u = y^{1-n}} \\frac{du}{dx} + (1-n)P(x)u = (1-n)Q(x)"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Resolver: \\quad \\frac{dy}{dx} + \\frac{1}{x}y = x y^2",
+                            steps: [
+                                { text: "Identificar n = 2. Aplicar cambio u = y^(1-2) = y⁻¹ (y = u⁻¹):", math: "\\frac{dy}{dx} = -u^{-2}\\frac{du}{dx}" },
+                                { text: "Sustituir en la EDO original y multiplicar por -u²:", math: "-u^{-2}\\frac{du}{dx} + \\frac{1}{x}u^{-1} = x u^{-2} \\implies \\frac{du}{dx} - \\frac{1}{x}u = -x" },
+                                { text: "Resolver la EDO lineal en u con μ(x) = e^(-ln x) = x⁻¹:", math: "\\frac{d}{dx}[x^{-1}u] = -1 \\implies x^{-1}u = -x + C \\implies u = -x^2 + Cx" },
+                                { text: "Volver a y = u⁻¹:", math: "y = \\frac{1}{Cx - x^2}" }
+                            ]
+                        },
+                        traps: [
+                            "Olvidar multiplicar P(x) y Q(x) por el factor (1 - n) al transformar la ecuación a lineal en 'u'.",
+                            "No deshacer la sustitución u = y^(1-n) al presentar el resultado."
+                        ]
+                    }
+                ]
+            },
+
+            // =========================================================================
+            // UNIDAD 2: EDO LINEALES DE ORDEN SUPERIOR
+            // =========================================================================
+            {
+                id: "u2",
+                code: "U02",
+                title: "EDO Lineales de Orden Superior",
+                shortTitle: "02. Orden Superior",
+                description: "Resolución de ecuaciones lineales de orden n ≥ 2: ecuación característica, coeficientes indeterminados, variación de parámetros y Cauchy-Euler.",
+                cards: [
+                    {
+                        id: "u2-homogeneas-const",
+                        title: "Homogéneas con Coeficientes Constantes",
+                        tag: "Orden n • Polinomio Auxiliar",
+                        identification: "Coeficientes numéricos constantes aₙy⁽ⁿ⁾ + ... + a₁y' + a₀y = 0.",
+                        prerequisites: [
+                            "Construir la ecuación característica reemplazando y⁽ᵏ⁾ por mᵏ.",
+                            "Factorizar o usar fórmula cuadrática / división sintética para hallar las n raíces.",
+                            "Verificar independencia lineal mediante el Wronskiano si se requiere demostración formal."
+                        ],
+                        formulas: [
+                            {
+                                label: "Ecuación Característica y Casos de Raíces",
+                                latex: "a_n m^n + \\dots + a_1 m + a_0 = 0 \\implies \\begin{cases} m_1 \\neq m_2 \\in \\mathbb{R}: & c_1 e^{m_1 x} + c_2 e^{m_2 x} \\\\ m_1 = m_2 \\in \\mathbb{R}: & (c_1 + c_2 x)e^{m_1 x} \\\\ m = \\alpha \\pm i\\beta: & e^{\\alpha x}(c_1 \\cos \\beta x + c_2 \\sin \\beta x) \\end{cases}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Resolver: \\quad y'' - 4y' + 13y = 0",
+                            steps: [
+                                { text: "Plantear la ecuación auxiliar cuadrática:", math: "m^2 - 4m + 13 = 0" },
+                                { text: "Aplicar fórmula general cuadrática:", math: "m = \\frac{4 \\pm \\sqrt{(-4)^2 - 4(1)(13)}}{2} = \\frac{4 \\pm \\sqrt{-36}}{2} = 2 \\pm 3i" },
+                                { text: "Identificar parte real α = 2 y parte imaginaria β = 3:", math: "y(x) = e^{2x}(c_1 \\cos 3x + c_2 \\sin 3x)" }
+                            ]
+                        },
+                        traps: [
+                            "Incluir la unidad imaginaria 'i' dentro del argumento del seno o coseno (correcto: sin(3x), incorrecto: sin(3ix)).",
+                            "En raíces repetidas de multiplicidad 3 (ej. m = 2, 2, 2), olvidar el término x²: (c₁ + c₂x + c₃x²)e^(2x)."
+                        ]
+                    },
+                    {
+                        id: "u2-coef-indeterminados",
+                        title: "Coeficientes Indeterminados",
+                        tag: "Orden n • No Homogénea",
+                        identification: "Coeficientes constantes y g(x) compuesto únicamente por polinomios, exponenciales e^(αx), sin(βx) o cos(βx).",
+                        prerequisites: [
+                            "Resolver PRIMERO la ecuación homogénea asociada para conocer yc(x).",
+                            "Proponer la forma general de yp(x) según g(x).",
+                            "Comparar cada término de yp con yc: si hay duplicación, multiplicar ese bloque por xˢ (s mínimo para eliminar duplicidad)."
+                        ],
+                        formulas: [
+                            {
+                                label: "Principio de Superposición y Regla de Multiplicidad",
+                                latex: "y(x) = y_c(x) + y_p(x), \\qquad y_p = x^s \\cdot [\\text{Forma propuesta según } g(x)]"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Resolver: \\quad y'' - 3y' + 2y = 4e^{2x}",
+                            steps: [
+                                { text: "Paso 1: Hallar yc de m² - 3m + 2 = 0 → (m - 1)(m - 2) = 0:", math: "y_c = c_1 e^x + c_2 e^{2x}" },
+                                { text: "Paso 2: Proponer yp = A·e^(2x). Como e^(2x) ya está en yc, multiplicar por x:", math: "y_p = A x e^{2x}" },
+                                { text: "Paso 3: Derivar yp dos veces y sustituir en la EDO:", math: "y_p' = A(2x+1)e^{2x}, \\quad y_p'' = A(4x+4)e^{2x} \\implies A(4x+4 - 6x - 3 + 2x)e^{2x} = 4e^{2x}" },
+                                { text: "Paso 4: Igualar coeficientes (A = 4) y sumar yc + yp:", math: "y(x) = c_1 e^x + c_2 e^{2x} + 4x e^{2x}" }
+                            ]
+                        },
+                        traps: [
+                            "Proponer yp ANTES de calcular yc, pasando por alto que g(x) es solución de la homogénea (lo que lleva a 0 = g(x)).",
+                            "Cuando g(x) = sin(3x), proponer solo A·sin(3x) olvidando el término acompañante B·cos(3x)."
+                        ]
+                    },
+                    {
+                        id: "u2-variacion-parametros",
+                        title: "Variación de Parámetros",
+                        tag: "Orden 2 • Método Universal",
+                        identification: "EDO lineal con cualquier función continua g(x) (como tan x, sec x, ln x, e^x / x) donde fallan los coeficientes indeterminados.",
+                        prerequisites: [
+                            "Dividir la ecuación entre a₂(x) para asegurar que y'' tenga coeficiente 1: y'' + P(x)y' + Q(x)y = f(x).",
+                            "Obtener y₁, y₂ de la solución complementaria yc.",
+                            "Calcular el Wronskiano W(y₁, y₂) y resolver las integrales de u₁' y u₂'."
+                        ],
+                        formulas: [
+                            {
+                                label: "Fórmulas de Cramer para Variación de Parámetros",
+                                latex: "y_p = u_1 y_1 + u_2 y_2, \\quad u_1 = -\\int \\frac{y_2 f(x)}{W}\\,dx, \\quad u_2 = \\int \\frac{y_1 f(x)}{W}\\,dx"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Hallar yp para: \\quad y'' + y = \\sec x",
+                            steps: [
+                                { text: "De m² + 1 = 0, tenemos y₁ = cos x, y₂ = sin x. Calcular Wronskiano:", math: "W = \\begin{vmatrix} \\cos x & \\sin x \\\\ -\\sin x & \\cos x \\end{vmatrix} = \\cos^2 x + \\sin^2 x = 1" },
+                                { text: "Calcular u₁ integrando (-y₂·f(x))/W:", math: "u_1 = -\\int \\frac{\\sin x \\cdot \\sec x}{1}\\,dx = -\\int \\tan x\\,dx = \\ln|\\cos x|" },
+                                { text: "Calcular u₂ integrando (y₁·f(x))/W:", math: "u_2 = \\int \\frac{\\cos x \\cdot \\sec x}{1}\\,dx = \\int 1\\,dx = x" },
+                                { text: "Ensamblar yp = u₁y₁ + u₂y₂:", math: "y_p = (\\ln|\\cos x|)\\cos x + x\\sin x" }
+                            ]
+                        },
+                        traps: [
+                            "Usar g(x) original sin haber dividido antes por el coeficiente principal a₂(x) (f(x) = g(x)/a₂(x)).",
+                            "Añadir constantes de integración en u₁ y u₂ (no hace falta, pues ya están incluidas en yc)."
+                        ]
+                    },
+                    {
+                        id: "u2-cauchy-euler",
+                        title: "Ecuación de Cauchy-Euler",
+                        tag: "Orden n • Coeficientes Variables",
+                        identification: "Cada derivada y⁽ᵏ⁾ está multiplicada por xᵏ: a·x²y'' + b·xy' + c·y = g(x).",
+                        prerequisites: [
+                            "Proponer la solución de prueba y = xᵐ (para x > 0).",
+                            "Derivar: y' = m·x^(m-1), y'' = m(m-1)·x^(m-2).",
+                            "Si es no homogénea y quieres usar coeficientes indeterminados, transforma primero con x = eᵗ."
+                        ],
+                        formulas: [
+                            {
+                                label: "Ecuación Indicial de Cauchy-Euler (Orden 2)",
+                                latex: "a m(m - 1) + b m + c = 0 \\implies \\begin{cases} m_1 \\neq m_2: & c_1 x^{m_1} + c_2 x^{m_2} \\\\ m_1 = m_2: & (c_1 + c_2 \\ln x)x^{m_1} \\\\ m = \\alpha \\pm i\\beta: & x^\\alpha [c_1 \\cos(\\beta \\ln x) + c_2 \\sin(\\beta \\ln x)] \\end{cases}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Resolver: \\quad x^2 y'' - 3x y' + 4y = 0 \\quad (x > 0)",
+                            steps: [
+                                { text: "Sustituir y = xᵐ para obtener la ecuación auxiliar en m:", math: "m(m - 1) - 3m + 4 = 0 \\implies m^2 - 4m + 4 = 0" },
+                                { text: "Factorizar el trinomio cuadrado perfecto:", math: "(m - 2)^2 = 0 \\implies m_1 = m_2 = 2 \\text{ (Raíz doble)}" },
+                                { text: "Aplicar la estructura de multiplicidad 2 con ln(x):", math: "y(x) = c_1 x^2 + c_2 x^2 \\ln x" }
+                            ]
+                        },
+                        traps: [
+                            "Plantear a·m² + b·m + c = 0 olvidando el '-1' en m(m - 1) proveniente de la segunda derivada.",
+                            "Multiplicar por 'x' en lugar de 'ln(x)' cuando las raíces m₁ y m₂ son iguales."
+                        ]
+                    }
+                ]
+            },
+
+            // =========================================================================
+            // UNIDAD 3: TRANSFORMADA DE LAPLACE
+            // =========================================================================
+            {
+                id: "u3",
+                code: "U03",
+                title: "Transformada de Laplace",
+                shortTitle: "03. Laplace",
+                description: "Conversión de problemas de valor inicial (PVI) y sistemas con entradas discontinuas o impulsivas en ecuaciones algebraicas en s.",
+                cards: [
+                    {
+                        id: "u3-basicas",
+                        title: "Transformadas Básicas y Linealidad",
+                        tag: "Dominio s • Tabla Base",
+                        identification: "Uso directo de la definición o tablas estándar para funciones continuas elementales y fracciones parciales.",
+                        prerequisites: [
+                            "Descomponer expresiones racionales Y(s) mediante fracciones parciales antes de invertir.",
+                            "Ajustar constantes multiplicativas en el numerador para coincidir exactamente con la tabla (ej. k en sin(kt))."
+                        ],
+                        formulas: [
+                            {
+                                label: "Transformadas Elementales Indispensables",
+                                latex: "\\mathcal{L}\\{1\\}=\\frac{1}{s}, \\quad \\mathcal{L}\\{t^n\\}=\\frac{n!}{s^{n+1}}, \\quad \\mathcal{L}\\{e^{at}\\}=\\frac{1}{s-a}, \\quad \\mathcal{L}\\{\\sin kt\\}=\\frac{k}{s^2+k^2}, \\quad \\mathcal{L}\\{\\cos kt\\}=\\frac{s}{s^2+k^2}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Calcular la transformada inversa: \\quad \\mathcal{L}^{-1}\\left\\{\\frac{3s + 8}{s^2 + 4}\\right\\}",
+                            steps: [
+                                { text: "Separar la fracción en dos términos (uno con s y otro constante):", math: "\\frac{3s}{s^2 + 4} + \\frac{8}{s^2 + 4} = 3\\left(\\frac{s}{s^2 + 2^2}\\right) + 4\\left(\\frac{2}{s^2 + 2^2}\\right)" },
+                                { text: "Aplicar linealidad e invertir usando cos(2t) y sin(2t):", math: "\\mathcal{L}^{-1}\\left\\{\\frac{3s + 8}{s^2 + 4}\\right\\} = 3\\cos(2t) + 4\\sin(2t)" }
+                            ]
+                        },
+                        traps: [
+                            "Invertir 1/(s² + 9) como sin(3t) olvidando dividir entre k = 3 (correcto: (1/3)sin(3t)).",
+                            "Confundir s² + k² (trigonométricas) con s² - k² (hiperbólicas sinh/cosh o fracciones parciales)."
+                        ]
+                    },
+                    {
+                        id: "u3-traslacion",
+                        title: "Teoremas de Traslación y Escalón Unitario",
+                        tag: "Dominio s / Tiempo t",
+                        identification: "1er Teorema: aparece e^(at)f(t) o denominadores (s-a)². 2do Teorema: señales encendidas/apagadas por tramos con U(t - a).",
+                        prerequisites: [
+                            "Completar cuadrados en denominadores cuadráticos sin raíces reales: s² + bs + c = (s + b/2)² + k².",
+                            "Reescribir funciones por tramos usando el escalón de Heaviside U(t - a)."
+                        ],
+                        formulas: [
+                            {
+                                label: "1er Teorema (Eje s) y 2do Teorema (Eje t)",
+                                latex: "\\mathcal{L}\\{e^{at}f(t)\\} = F(s-a), \\qquad \\mathcal{L}\\{f(t-a)\\mathcal{U}(t-a)\\} = e^{-as}F(s)"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Calcular: \\quad \\mathcal{L}^{-1}\\left\\{\\frac{e^{-2s}}{s^2 + 6s + 13}\\right\\}",
+                            steps: [
+                                { text: "Completar el cuadrado en el denominador:", math: "s^2 + 6s + 13 = (s + 3)^2 + 4 = (s + 3)^2 + 2^2" },
+                                { text: "Invertir sin la exponencial usando el 1er Teorema de Traslación (a = -3):", math: "f(t) = \\mathcal{L}^{-1}\\left\\{\\frac{1}{2}\\cdot\\frac{2}{(s+3)^2 + 2^2}\\right\\} = \\frac{1}{2}e^{-3t}\\sin(2t)" },
+                                { text: "Aplicar el 2do Teorema por el factor e^(-2s), desplazando t → (t - 2):", math: "\\mathcal{L}^{-1}\\left\\{\\frac{e^{-2s}}{(s+3)^2+4}\\right\\} = \\frac{1}{2}e^{-3(t-2)}\\sin(2(t-2))\\,\\mathcal{U}(t - 2)" }
+                            ]
+                        },
+                        traps: [
+                            "Al aplicar el 2do teorema inverso a e^(-as)F(s), olvidar evaluar f(t) en (t - a) o no multiplicar por U(t - a).",
+                            "En el directo L{t·U(t - 3)}, olvidar reescribir t = (t - 3) + 3 antes de transformar."
+                        ]
+                    },
+                    {
+                        id: "u3-derivadas-pvi",
+                        title: "Transformada de Derivadas (Solución de PVI)",
+                        tag: "PVI • Álgebra en s",
+                        identification: "Ecuación diferencial lineal con coeficientes constantes y condiciones iniciales dadas en t = 0: y(0), y'(0).",
+                        prerequisites: [
+                            "Aplicar L{·} término a término en toda la EDO.",
+                            "Sustituir y(0) y y'(0) inmediatamente.",
+                            "Factorizar Y(s) = L{y(t)}, despejarlo y descomponer en fracciones parciales."
+                        ],
+                        formulas: [
+                            {
+                                label: "Reglas de Derivación Operacional",
+                                latex: "\\mathcal{L}\\{y'\\} = sY(s) - y(0), \\qquad \\mathcal{L}\\{y''\\} = s^2Y(s) - sy(0) - y'(0)"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Resolver: \\quad y'' + 4y = 0, \\quad y(0) = 2, \\; y'(0) = -6",
+                            steps: [
+                                { text: "Aplicar transformada de Laplace a ambos lados:", math: "[s^2 Y(s) - s(2) - (-6)] + 4Y(s) = 0" },
+                                { text: "Agrupar Y(s) y despejar algebraicamente:", math: "(s^2 + 4)Y(s) = 2s - 6 \\implies Y(s) = \\frac{2s}{s^2 + 4} - 3\\left(\\frac{2}{s^2 + 4}\\right)" },
+                                { text: "Aplicar transformada inversa L⁻¹{Y(s)}:", math: "y(t) = 2\\cos(2t) - 3\\sin(2t)" }
+                            ]
+                        },
+                        traps: [
+                            "Invertir los signos en L{y''}: tanto s·y(0) como y'(0) llevan signo negativo.",
+                            "Si las condiciones iniciales están en t = t₀ ≠ 0, primero debes hacer el cambio de variable τ = t - t₀."
+                        ]
+                    },
+                    {
+                        id: "u3-convolucion-dirac",
+                        title: "Convolución y Delta de Dirac δ(t - t₀)",
+                        tag: "Impulsos • Ecuaciones Integrales",
+                        identification: "Aparece un golpe/impulso instantáneo δ(t - t₀) o una integral de convolución ∫₀ᵗ f(τ)g(t-τ)dτ.",
+                        prerequisites: [
+                            "Recordar que L{δ(t - t₀)} = e^(-t₀s) y L{δ(t)} = 1.",
+                            "Para ecuaciones integrodiferenciales, transformar la integral directamente como producto F(s)·G(s)."
+                        ],
+                        formulas: [
+                            {
+                                label: "Teorema de Convolución e Impulso Unitario",
+                                latex: "\\mathcal{L}\\left\\{\\int_0^t f(\\tau)g(t-\\tau)\\,d\\tau\\right\\} = F(s)G(s), \\qquad \\mathcal{L}\\{\\delta(t - t_0)\\} = e^{-t_0 s}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Resolver: \\quad y' + 2y = \\delta(t - 3), \\quad y(0) = 0",
+                            steps: [
+                                { text: "Transformar ambos lados (con y(0) = 0):", math: "sY(s) + 2Y(s) = e^{-3s} \\implies Y(s) = \\frac{e^{-3s}}{s + 2}" },
+                                { text: "Aplicar 2do teorema de traslación sabiendo que L⁻¹{1/(s+2)} = e^(-2t):", math: "y(t) = e^{-2(t - 3)}\\,\\mathcal{U}(t - 3)" }
+                            ]
+                        },
+                        traps: [
+                            "Confundir L{δ(t - a)} = e^(-as) con L{U(t - a)} = e^(-as)/s (la Delta no lleva /s).",
+                            "Evaluar L⁻¹{F(s)G(s)} como f(t)·g(t) en lugar de la integral de convolución f * g."
+                        ]
+                    }
+                ]
+            },
+
+            // =========================================================================
+            // UNIDAD 4: SERIES DE POTENCIAS Y COEFICIENTES VARIABLES
+            // =========================================================================
+            {
+                id: "u4",
+                code: "U04",
+                title: "Series de Potencias y Coeficientes Variables",
+                shortTitle: "04. Series Potencias",
+                description: "Soluciones analíticas en forma de series infinitas alrededor de puntos ordinarios y singulares regulares (Frobenius, Bessel y Legendre).",
+                cards: [
+                    {
+                        id: "u4-puntos-ordinarios",
+                        title: "Solución en Puntos Ordinarios",
+                        tag: "Taylor • Coeficientes Variables",
+                        identification: "En y'' + P(x)y' + Q(x)y = 0, tanto P(x) como Q(x) son analíticas en x₀ (el coeficiente principal a₂(x₀) ≠ 0).",
+                        prerequisites: [
+                            "Normalizar la ecuación dividiendo por a₂(x) para clasificar x₀.",
+                            "Proponer y = Σ cₙ(x - x₀)ⁿ y calcular y', y''.",
+                            "Sincronizar los índices de todas las sumatorias para que tengan la misma potencia xᵏ y empiecen en el mismo valor de k."
+                        ],
+                        formulas: [
+                            {
+                                label: "Desarrollo en Serie Alrededor de x₀ = 0",
+                                latex: "y = \\sum_{n=0}^{\\infty} c_n x^n, \\quad y' = \\sum_{n=1}^{\\infty} n c_n x^{n-1}, \\quad y'' = \\sum_{n=2}^{\\infty} n(n-1)c_n x^{n-2}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Hallar la relación de recurrencia para: \\quad y'' + x y = 0 \\quad (x_0 = 0)",
+                            steps: [
+                                { text: "Sustituir y'' y y en la EDO:", math: "\\sum_{n=2}^{\\infty} n(n-1)c_n x^{n-2} + \\sum_{n=0}^{\\infty} c_n x^{n+1} = 0" },
+                                { text: "Hacer cambio de índice k = n - 2 en la 1ra suma y k = n + 1 en la 2da:", math: "\\sum_{k=0}^{\\infty} (k+2)(k+1)c_{k+2} x^k + \\sum_{k=1}^{\\infty} c_{k-1} x^k = 0" },
+                                { text: "Separar k = 0 (2c₂ = 0 → c₂ = 0) y unificar desde k = 1:", math: "2c_2 + \\sum_{k=1}^{\\infty} [(k+2)(k+1)c_{k+2} + c_{k-1}]x^k = 0 \\implies c_{k+2} = -\\frac{c_{k-1}}{(k+2)(k+1)}" }
+                            ]
+                        },
+                        traps: [
+                            "Unificar sumatorias que arrancan en distintos índices (ej. k = 0 y k = 1) sin extraer primero los términos sueltos.",
+                            "Olvidar que c₀ y c₁ quedan como las dos constantes arbitrarias libres de la solución general."
+                        ]
+                    },
+                    {
+                        id: "u4-frobenius",
+                        title: "Método de Frobenius (Puntos Singulares)",
+                        tag: "Ecuación Indicial • Singular Regular",
+                        identification: "a₂(x₀) = 0, pero (x - x₀)P(x) y (x - x₀)²Q(x) sí son analíticas en x₀.",
+                        prerequisites: [
+                            "Confirmar que x₀ es singular regular (límites finitos p₀ y q₀).",
+                            "Proponer y = Σ cₙ xⁿ⁺ʳ con c₀ ≠ 0.",
+                            "Resolver la ecuación indicial r(r - 1) + p₀r + q₀ = 0 para hallar r₁ ≥ r₂."
+                        ],
+                        formulas: [
+                            {
+                                label: "Serie de Frobenius y Ecuación Indicial",
+                                latex: "y = \\sum_{n=0}^{\\infty} c_n x^{n+r} \\implies r(r - 1) + p_0 r + q_0 = 0, \\quad \\begin{cases} p_0 = \\lim_{x\\to 0} xP(x) \\\\ q_0 = \\lim_{x\\to 0} x^2Q(x) \\end{cases}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Hallar las raíces indiciales de: \\quad 2x y'' + (1 + x)y' + y = 0",
+                            steps: [
+                                { text: "Dividir entre 2x para identificar P(x) y Q(x):", math: "y'' + \\frac{1+x}{2x}y' + \\frac{1}{2x}y = 0 \\implies p_0 = \\lim_{x\\to 0} x\\frac{1+x}{2x} = \\frac{1}{2}, \\quad q_0 = \\lim_{x\\to 0} x^2\\frac{1}{2x} = 0" },
+                                { text: "Plantear la ecuación indicial r(r - 1) + p₀r + q₀ = 0:", math: "r(r - 1) + \\frac{1}{2}r + 0 = 0 \\implies r^2 - \\frac{1}{2}r = 0" },
+                                { text: "Resolver: r₁ = 1/2, r₂ = 0. Como r₁ - r₂ = 1/2 (no entero), ambas son series de Frobenius puras:", math: "y_1 = x^{1/2}\\sum_{n=0}^{\\infty} c_n x^n, \\qquad y_2 = \\sum_{n=0}^{\\infty} b_n x^n" }
+                            ]
+                        },
+                        traps: [
+                            "Si r₁ = r₂ o r₁ - r₂ es entero positivo, olvidar el término logarítmico y₁·ln(x) en la segunda solución y₂(x).",
+                            "No dividir entre a₂(x) antes de calcular p₀ y q₀."
+                        ]
+                    },
+                    {
+                        id: "u4-bessel-legendre",
+                        title: "Ecuaciones de Bessel y Legendre",
+                        tag: "Funciones Especiales • Física/Sistemas",
+                        identification: "Ecuaciones clásicas con simetría cilíndrica (Bessel) o esférica (Legendre) que aparecen en propagación de ondas y campos.",
+                        prerequisites: [
+                            "Identificar el parámetro de orden ν (Bessel) o n entero no negativo (Legendre).",
+                            "Recordar los primeros polinomios de Legendre P₀(x), P₁(x), P₂(x) y la fórmula de Rodrigues."
+                        ],
+                        formulas: [
+                            {
+                                label: "Ecuación de Bessel de Orden ν",
+                                latex: "x^2 y'' + x y' + (x^2 - \\nu^2)y = 0 \\implies y(x) = c_1 J_\\nu(x) + c_2 Y_\\nu(x)"
+                            },
+                            {
+                                label: "Ecuación y Polinomios de Legendre",
+                                latex: "(1 - x^2)y'' - 2x y' + n(n+1)y = 0, \\qquad P_n(x) = \\frac{1}{2^n n!}\\frac{d^n}{dx^n}(x^2 - 1)^n"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Identificar la solución general de: \\quad x^2 y'' + x y' + (x^2 - 9)y = 0",
+                            steps: [
+                                { text: "Comparar con la forma estándar de Bessel x²y'' + xy' + (x² - ν²)y = 0:", math: "\\nu^2 = 9 \\implies \\nu = 3 \\text{ (Orden entero)}" },
+                                { text: "Como ν es entero, J₋₃(x) es dependiente de J₃(x); se usa Bessel de 2da especie Y₃(x):", math: "y(x) = c_1 J_3(x) + c_2 Y_3(x)" }
+                            ]
+                        },
+                        traps: [
+                            "Escribir c₁Jᵥ(x) + c₂J₋ᵥ(x) cuando ν es un número entero (en ese caso son linealmente dependientes y debe usarse Yᵥ(x))."
+                        ]
+                    }
+                ]
+            },
+
+            // =========================================================================
+            // UNIDAD 5: SERIES DE FOURIER
+            // =========================================================================
+            {
+                id: "u5",
+                code: "U05",
+                title: "Series de Fourier",
+                shortTitle: "05. Series Fourier",
+                description: "Representación espectral de señales periódicas mediante bases ortogonales de senos, cosenos y exponenciales complejas.",
+                cards: [
+                    {
+                        id: "u5-euler-fourier",
+                        title: "Coeficientes de Euler-Fourier (Intervalo [-L, L])",
+                        tag: "Análisis Espectral • Ortogonalidad",
+                        identification: "Función periódica f(x) definida en [-L, L] con periodo total T = 2L.",
+                        prerequisites: [
+                            "Determinar L correctamente (si el intervalo es [-π, π], L = π; si es [-2, 2], L = 2).",
+                            "Dominar integración por partes tabular para productos de polinomios por senos/cosenos.",
+                            "Recordar identidades clave para n ∈ ℤ⁺: sin(nπ) = 0 y cos(nπ) = (-1)ⁿ."
+                        ],
+                        formulas: [
+                            {
+                                label: "Serie Trigonométrica y Coeficientes de Euler",
+                                latex: "f(x) \\sim \\frac{a_0}{2} + \\sum_{n=1}^{\\infty}\\left(a_n\\cos\\frac{n\\pi x}{L} + b_n\\sin\\frac{n\\pi x}{L}\\right), \\quad \\begin{cases} a_0 = \\frac{1}{L}\\int_{-L}^L f(x)\\,dx \\\\ a_n = \\frac{1}{L}\\int_{-L}^L f(x)\\cos\\frac{n\\pi x}{L}\\,dx \\\\ b_n = \\frac{1}{L}\\int_{-L}^L f(x)\\sin\\frac{n\\pi x}{L}\\,dx \\end{cases}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Hallar a₀ y aₙ para la onda cuadrada: \\quad f(x) = 0 \\;(-\\pi < x < 0), \\quad f(x) = 1 \\;(0 < x < \\pi)",
+                            steps: [
+                                { text: "Aquí L = π. Calcular a₀ integrando solo donde f(x) ≠ 0:", math: "a_0 = \\frac{1}{\\pi}\\int_0^\\pi 1\\,dx = \\frac{\\pi}{\\pi} = 1 \\implies \\frac{a_0}{2} = \\frac{1}{2}" },
+                                { text: "Calcular aₙ para n ≥ 1:", math: "a_n = \\frac{1}{\\pi}\\int_0^\\pi 1\\cdot\\cos(nx)\\,dx = \\frac{1}{\\pi}\\left[\\frac{\\sin(nx)}{n}\\right]_0^\\pi = 0" },
+                                { text: "Calcular bₙ para completar la serie:", math: "b_n = \\frac{1}{\\pi}\\int_0^\\pi \\sin(nx)\\,dx = \\frac{1 - (-1)^n}{n\\pi} \\implies f(x) \\sim \\frac{1}{2} + \\frac{2}{\\pi}\\sum_{k=1}^{\\infty}\\frac{\\sin((2k-1)x)}{2k-1}" }
+                            ]
+                        },
+                        traps: [
+                            "Olvidar dividir a₀ entre 2 al insertarlo en la serie f(x) ~ a₀/2 + Σ(...).",
+                            "Evaluar cos(nπ) como 1 en lugar de (-1)ⁿ."
+                        ]
+                    },
+                    {
+                        id: "u5-simetria",
+                        title: "Simetría Par/Impar y Medio Rango",
+                        tag: "Atajo Algebraico • [0, L]",
+                        identification: "Funciones simétricas en [-L, L] o funciones definidas solo en [0, L] que piden expansión en cosenos o en senos.",
+                        prerequisites: [
+                            "Evaluar f(-x): si f(-x) = f(x) es PAR; si f(-x) = -f(x) es IMPAR.",
+                            "Para Medio Rango en [0, L]: Serie de Cosenos = extensión par; Serie de Senos = extensión impar."
+                        ],
+                        formulas: [
+                            {
+                                label: "Fórmulas Simplificadas por Simetría",
+                                latex: "\\text{Par: } b_n = 0, \\; a_n = \\frac{2}{L}\\int_0^L f(x)\\cos\\frac{n\\pi x}{L}\\,dx \\qquad \\text{Impar: } a_0 = a_n = 0, \\; b_n = \\frac{2}{L}\\int_0^L f(x)\\sin\\frac{n\\pi x}{L}\\,dx"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Expandir f(x) = x en serie de Fourier en [-π, π]",
+                            steps: [
+                                { text: "Verificar simetría: f(-x) = -x = -f(x), por lo tanto es IMPAR (a₀ = 0, aₙ = 0):", math: "b_n = \\frac{2}{\\pi}\\int_0^\\pi x\\sin(nx)\\,dx" },
+                                { text: "Integrar por partes (u = x, dv = sin(nx)dx):", math: "b_n = \\frac{2}{\\pi}\\left[ -\\frac{x\\cos(nx)}{n} + \\frac{\\sin(nx)}{n^2} \\right]_0^\\pi = \\frac{2}{\\pi}\\left(-\\frac{\\pi(-1)^n}{n}\\right) = \\frac{2(-1)^{n+1}}{n}" },
+                                { text: "Escribir la serie resultante:", math: "x \\sim 2\\sum_{n=1}^{\\infty} \\frac{(-1)^{n+1}}{n}\\sin(nx)" }
+                            ]
+                        },
+                        traps: [
+                            "Olvidar multiplicar por 2 la integral al reducir los límites de [-L, L] a [0, L].",
+                            "Asumir que toda función es par o impar (ej. f(x) = x + 1 no tiene ninguna de las dos simetrías)."
+                        ]
+                    },
+                    {
+                        id: "u5-compleja-dirichlet",
+                        title: "Forma Compleja y Teorema de Dirichlet",
+                        tag: "DSP • Espectro Bilateral",
+                        identification: "Representación con exponenciales e^(i·nω₀x) usada en procesamiento digital de señales y análisis de salto en discontinuidades.",
+                        prerequisites: [
+                            "Aplicar fórmula de Euler: e^(iθ) = cos θ + i sin θ.",
+                            "Para hallar el valor al que converge la serie en un salto x₀, promediar límites laterales."
+                        ],
+                        formulas: [
+                            {
+                                label: "Serie Compleja de Fourier y Convergencia en Saltos",
+                                latex: "f(x) \\sim \\sum_{n=-\\infty}^{\\infty} c_n e^{i\\frac{n\\pi x}{L}}, \\quad c_n = \\frac{1}{2L}\\int_{-L}^L f(x)e^{-i\\frac{n\\pi x}{L}}\\,dx, \\quad S(x_0) = \\frac{f(x_0^+) + f(x_0^-)}{2}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Hallar el valor de convergencia en x = 0 para la onda cuadrada f(x) = 0 (-π < x < 0), f(x) = 1 (0 < x < π)",
+                            steps: [
+                                { text: "Identificar límite por la izquierda y por la derecha en x₀ = 0:", math: "f(0^-) = 0, \\qquad f(0^+) = 1" },
+                                { text: "Aplicar el Teorema de Convergencia de Dirichlet:", math: "S(0) = \\frac{0 + 1}{2} = \\frac{1}{2}" }
+                            ]
+                        },
+                        traps: [
+                            "Olvidar el signo negativo en el exponente e^(-i·nπx/L) dentro de la integral para calcular cₙ.",
+                            "Usar 1/L en lugar de 1/(2L) como factor delante de la integral compleja."
+                        ]
+                    }
+                ]
+            },
+
+            // =========================================================================
+            // UNIDAD 6: APLICACIONES EN INGENIERÍA DE SISTEMAS
+            // =========================================================================
+            {
+                id: "u6",
+                code: "U06",
+                title: "Aplicaciones en Ingeniería de Sistemas",
+                shortTitle: "06. Aplicaciones Sistemas",
+                description: "Modelado matemático de sistemas físicos, redes de información, circuitos electrónicos y estabilidad en ingeniería de control.",
+                cards: [
+                    {
+                        id: "u6-rlc",
+                        title: "Circuitos Eléctricos RLC en Serie",
+                        tag: "Hardware • EDO 2do Orden",
+                        identification: "Modelado de carga q(t) o corriente i(t) = dq/dt en circuitos con resistencia R, inductancia L y capacitancia C.",
+                        prerequisites: [
+                            "Aplicar la Segunda Ley de Kirchhoff (suma de caídas de voltaje = voltaje fuente E(t)).",
+                            "Recordar relaciones constitutivas: VR = R·i, VL = L·(di/dt), VC = q/C."
+                        ],
+                        formulas: [
+                            {
+                                label: "Ecuación Diferencial de Carga q(t)",
+                                latex: "L\\frac{d^2q}{dt^2} + R\\frac{dq}{dt} + \\frac{1}{C}q = E(t), \\qquad i(t) = \\frac{dq}{dt}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Circuito RLC con L = 1 H, R = 4 Ω, C = 0.25 F, sin fuente E(t) = 0. Hallar tipo de amortiguamiento.",
+                            steps: [
+                                { text: "Sustituir parámetros (1/C = 1/0.25 = 4):", math: "q'' + 4q' + 4q = 0" },
+                                { text: "Resolver ecuación característica m² + 4m + 4 = 0:", math: "(m + 2)^2 = 0 \\implies m_1 = m_2 = -2" },
+                                { text: "Raíces reales iguales indican sistema Críticamente Amortiguado:", math: "q(t) = (c_1 + c_2 t)e^{-2t}" }
+                            ]
+                        },
+                        traps: [
+                            "Sustituir C directamente en lugar de su inverso 1/C en el coeficiente de q(t).",
+                            "Entregar q(t) cuando el problema solicita específicamente la corriente i(t) = q'(t)."
+                        ]
+                    },
+                    {
+                        id: "u6-masa-resorte",
+                        title: "Sistemas Masa-Resorte-Amortiguador",
+                        tag: "Robótica • Sistemas Dinámicos",
+                        identification: "Simulación física de vibraciones mecánicas, actuadores y suspensión con masa m, amortiguación β y rigidez k.",
+                        prerequisites: [
+                            "Convertir unidades a sistema consistente (ej. SI: kg, N·s/m, N/m).",
+                            "Analizar el discriminante Δ = β² - 4mk para clasificar el régimen dinámico."
+                        ],
+                        formulas: [
+                            {
+                                label: "Ecuación de Movimiento Armónico Amortiguado",
+                                latex: "m\\frac{d^2x}{dt^2} + \\beta\\frac{dx}{dt} + kx = F(t), \\qquad \\omega_0 = \\sqrt{\\frac{k}{m}}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Analizar régimen libre de: \\quad 2x'' + 2x' + 5x = 0",
+                            steps: [
+                                { text: "Calcular discriminante β² - 4mk = 2² - 4(2)(5) = -36 < 0:", math: "m = \\frac{-2 \\pm \\sqrt{-36}}{4} = -\\frac{1}{2} \\pm \\frac{3}{2}i" },
+                                { text: "Al tener raíces complejas con parte real negativa, es Subamortiguado (oscila decayendo):", math: "x(t) = e^{-t/2}\\left(c_1\\cos\\frac{3}{2}t + c_2\\sin\\frac{3}{2}t\\right)" }
+                            ]
+                        },
+                        traps: [
+                            "Confundir la posición de equilibrio estático (x = 0) con el punto de anclaje sin estirar del resorte."
+                        ]
+                    },
+                    {
+                        id: "u6-redes-malware",
+                        title: "Propagación de Malware / Información en Redes",
+                        tag: "Ciberseguridad • Modelo Logístico",
+                        identification: "Dinámica de infección o difusión viral en una red cerrada de N nodos/hosts con tasa de contacto k.",
+                        prerequisites: [
+                            "Plantear dI/dt proporcional tanto a los infectados I(t) como a los susceptibles N - I(t).",
+                            "Resolver mediante fracciones parciales (separables) o Bernoulli."
+                        ],
+                        formulas: [
+                            {
+                                label: "Modelo Logístico de Difusión en Red",
+                                latex: "\\frac{dI}{dt} = k I (N - I) \\implies I(t) = \\frac{N}{1 + \\left(\\frac{N - I_0}{I_0}\\right)e^{-kNt}}"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Un gusano infecta 1 servidor en una red de N = 500. Si a t = 1h hay 10 infectados, hallar I(t).",
+                            steps: [
+                                { text: "Sustituir N = 500 e I₀ = 1 en la solución logística:", math: "I(t) = \\frac{500}{1 + 499e^{-500kt}}" },
+                                { text: "Usar I(1) = 10 para despejar el factor exponencial e^(-500k):", math: "10 = \\frac{500}{1 + 499e^{-500k}} \\implies 1 + 499e^{-500k} = 50 \\implies e^{-500k} = \\frac{49}{499}" },
+                                { text: "Sustituir en la ecuación temporal:", math: "I(t) = \\frac{500}{1 + 499\\left(\\frac{49}{499}\\right)^t}" }
+                            ]
+                        },
+                        traps: [
+                            "Usar crecimiento exponencial ilimitado dI/dt = kI ignorando que el número total de nodos N en la red es finito."
+                        ]
+                    },
+                    {
+                        id: "u6-transferencia-estabilidad",
+                        title: "Función de Transferencia y Estabilidad",
+                        tag: "Teoría de Control • Sistemas LTI",
+                        identification: "Análisis entrada-salida en el dominio de Laplace H(s) = Y(s)/U(s) y criterio de estabilidad BIBO.",
+                        prerequisites: [
+                            "Establecer todas las condiciones iniciales en cero: y(0) = y'(0) = 0.",
+                            "Factorizar el polinomio denominador de H(s) para hallar los polos del sistema."
+                        ],
+                        formulas: [
+                            {
+                                label: "Función de Transferencia y Criterio de Estabilidad",
+                                latex: "H(s) = \\frac{Y(s)}{U(s)} = \\frac{P(s)}{Q(s)}, \\qquad \\text{Estable} \\iff \\operatorname{Re}(s_i) < 0 \\; \\forall\\text{ polo } s_i"
+                            }
+                        ],
+                        workedExample: {
+                            statement: "Hallar H(s) y evaluar estabilidad de un sistema gobernado por: \\quad y'' + 5y' + 6y = 2u'(t) + u(t)",
+                            steps: [
+                                { text: "Aplicar Laplace con condiciones iniciales nulas:", math: "(s^2 + 5s + 6)Y(s) = (2s + 1)U(s)" },
+                                { text: "Despejar el cociente H(s) = Y(s)/U(s):", math: "H(s) = \\frac{2s + 1}{s^2 + 5s + 6} = \\frac{2s + 1}{(s + 2)(s + 3)}" },
+                                { text: "Analizar los polos (raíces del denominador): s₁ = -2, s₂ = -3:", math: "\\operatorname{Re}(s_1) = -2 < 0 \\;\\text{y}\\; \\operatorname{Re}(s_2) = -3 < 0 \\implies \\text{Sistema Estable}" }
+                            ]
+                        },
+                        traps: [
+                            "Incluir condiciones iniciales distintas de cero al calcular H(s) (la función de transferencia exige reposo inicial).",
+                            "Confundir los ceros (raíces del numerador) con los polos (raíces del denominador) al analizar estabilidad."
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // =========================================================================
+        // DIAGNOSTIC DECISION TREE DATA
+        // =========================================================================
+        const diagnosticTree = {
+            root: {
+                question: "¿Cuál es el orden máximo de derivada o dominio de tu problema?",
+                subtitle: "Selecciona la característica principal de la ecuación que deseas resolver.",
+                options: [
+                    { label: "1er Orden (solo aparece y' o dy/dx)", next: "order1", icon: "git-branch" },
+                    { label: "Orden Superior (aparece y'', y''', etc.)", next: "orderN", icon: "waves" },
+                    { label: "Tiene condiciones en t = 0, impulsos δ(t) o tramos U(t-a)", next: "laplace", icon: "cpu" },
+                    { label: "Es una señal periódica en [-L, L] o [0, L]", next: "fourier", icon: "audio-waveform" },
+                    { label: "Es un modelo aplicado (Circuitos, Redes, Control)", next: "apps", icon: "network" }
+                ]
+            },
+            order1: {
+                question: "¿Qué estructura algebraica tiene tu EDO de 1er orden?",
+                subtitle: "Observa cómo están combinadas las variables 'x' e 'y'.",
+                options: [
+                    { label: "Se puede factorizar como dy/dx = g(x)·h(y)", resultCardId: "u1-separables", reason: "Al separarse completamente en factores puros de x e y, el método más rápido es Variables Separables." },
+                    { label: "Es lineal: y' + P(x)y = Q(x) (y está elevada a la 1)", resultCardId: "u1-lineal", reason: "Tiene estructura lineal estándar; se resuelve multiplicando por el factor integrante μ(x) = e^(∫P(x)dx)." },
+                    { label: "Es casi lineal, pero tiene yⁿ al lado derecho: y' + P(x)y = Q(x)yⁿ", resultCardId: "u1-bernoulli", reason: "Es una Ecuación de Bernoulli. Con u = y^(1-n) se transforma en lineal." },
+                    { label: "Está escrita como M(x,y)dx + N(x,y)dy = 0", next: "order1_diff" }
+                ]
+            },
+            order1_diff: {
+                question: "En M(x,y)dx + N(x,y)dy = 0, ¿qué propiedad se cumple?",
+                subtitle: "Comprueba las derivadas parciales cruzadas o el grado de sus términos.",
+                options: [
+                    { label: "∂M/∂y = ∂N/∂x (o su diferencia permite hallar μ(x) o μ(y))", resultCardId: "u1-exactas", reason: "Corresponde a una Ecuación Exacta (o reducible a exacta mediante factor integrante)." },
+                    { label: "Todos los términos de M y N tienen el mismo grado total", resultCardId: "u1-homogeneas", reason: "Es una EDO Homogénea. Aplica la sustitución y = ux para convertirla en separable." }
+                ]
+            },
+            orderN: {
+                question: "¿Cómo son los coeficientes que acompañan a y'', y', y?",
+                subtitle: "Fíjate si son números fijos o funciones de x.",
+                options: [
+                    { label: "Son números constantes y el lado derecho es 0", resultCardId: "u2-homogeneas-const", reason: "Se resuelve directamente planteando la ecuación característica polinómica en 'm'." },
+                    { label: "Son números constantes y g(x) tiene polinomios, e^(αx), sin o cos", resultCardId: "u2-coef-indeterminados", reason: "Usa Coeficientes Indeterminados proponiendo una forma particular yp(x)." },
+                    { label: "Son números constantes y g(x) tiene tan(x), sec(x), ln(x) o 1/x", resultCardId: "u2-variacion-parametros", reason: "Coeficientes indeterminados no aplica; debes usar Variación de Parámetros con Wronskiano." },
+                    { label: "Tienen la forma a·x²y'' + b·xy' + c·y = g(x)", resultCardId: "u2-cauchy-euler", reason: "Es una Ecuación de Cauchy-Euler. Se resuelve probando y = xᵐ." },
+                    { label: "Son polinomios generales (ej. y'' + xy = 0) y piden serie", next: "series" }
+                ]
+            },
+            series: {
+                question: "Al normalizar y'' + P(x)y' + Q(x)y = 0, ¿cómo se comporta en x₀?",
+                subtitle: "Evalúa si P(x) y Q(x) tienen divisiones por cero en x₀.",
+                options: [
+                    { label: "P(x) y Q(x) son analíticas en x₀ (Punto Ordinario)", resultCardId: "u4-puntos-ordinarios", reason: "Usa una Serie de Potencias estándar y = Σ cₙ(x - x₀)ⁿ." },
+                    { label: "Hay singularidad regular en x₀ (ej. x²y'' + xy' + ... = 0)", resultCardId: "u4-frobenius", reason: "Aplica el Método de Frobenius y = Σ cₙxⁿ⁺ʳ y resuelve la ecuación indicial." },
+                    { label: "Tiene exactamente la forma de Bessel o Legendre", resultCardId: "u4-bessel-legendre", reason: "Usa directamente las soluciones canónicas Jᵥ(x), Yᵥ(x) o polinomios Pₙ(x)." }
+                ]
+            },
+            laplace: {
+                question: "¿Qué elemento especial aparece en tu problema de Laplace?",
+                subtitle: "Selecciona la característica principal de la función de entrada o ecuación.",
+                options: [
+                    { label: "Es un PVI estándar con y(0), y'(0) y funciones continuas", resultCardId: "u3-derivadas-pvi", reason: "Aplica L{y'} y L{y''} para convertir la EDO en una ecuación algebraica en Y(s)." },
+                    { label: "Aparece e^(at) multiplicando o funciones por tramos U(t - a)", resultCardId: "u3-traslacion", reason: "Usa el Primer o Segundo Teorema de Traslación (Heaviside)." },
+                    { label: "Aparece un impulso Delta de Dirac δ(t - t₀) o una integral ∫₀ᵗ", resultCardId: "u3-convolucion-dirac", reason: "Aplica L{δ(t-t₀)} = e^(-t₀s) o el Teorema de Convolución F(s)·G(s)." }
+                ]
+            },
+            fourier: {
+                question: "¿Qué tipo de representación de Fourier necesitas?",
+                subtitle: "Verifica la simetría de la función o el intervalo dado.",
+                options: [
+                    { label: "Función general en [-L, L] sin simetría evidente", resultCardId: "u5-euler-fourier", reason: "Calcula los coeficientes completos a₀, aₙ y bₙ con las fórmulas de Euler-Fourier." },
+                    { label: "Función Par/Impar en [-L, L] o expansión en [0, L]", resultCardId: "u5-simetria", reason: "Aprovecha la simetría para anular aₙ o bₙ e integrar solo de 0 a L." },
+                    { label: "Forma exponencial compleja e^(i·nωx) o salto en discontinuidad", resultCardId: "u5-compleja-dirichlet", reason: "Usa los coeficientes complejos cₙ y el Teorema de Convergencia de Dirichlet." }
+                ]
+            },
+            apps: {
+                question: "¿Qué sistema de Ingeniería de Sistemas estás modelando?",
+                subtitle: "Selecciona el dominio de aplicación.",
+                options: [
+                    { label: "Circuito eléctrico RLC en serie (carga q o corriente i)", resultCardId: "u6-rlc", reason: "Aplica la Ley de Voltajes de Kirchhoff Lq'' + Rq' + (1/C)q = E(t)." },
+                    { label: "Sistema mecánico Masa-Resorte-Amortiguador", resultCardId: "u6-masa-resorte", reason: "Modela con mx'' + βx' + kx = F(t) y evalúa el amortiguamiento." },
+                    { label: "Propagación de virus informático o información en una red", resultCardId: "u6-redes-malware", reason: "Usa la ecuación logística dI/dt = kI(N - I) para redes finitas." },
+                    { label: "Función de Transferencia H(s) y análisis de estabilidad", resultCardId: "u6-transferencia-estabilidad", reason: "Calcula H(s) = Y(s)/U(s) con condiciones iniciales nulas y verifica Re(polos) < 0." }
+                ]
+            }
+        };
+
+        // =========================================================================
+        // APPLICATION STATE & STORAGE
+        // =========================================================================
+        let activeUnitId = "all"; // "all" or "u1".."u6"
+        let searchQuery = "";
+        let focusHideMastered = false;
+        let masteredCards = new Set(JSON.parse(localStorage.getItem("diffeq-mastered") || "[]"));
+        let activeCardTabs = {}; // tracks active sub-tab per card ('formulas' | 'example' | 'traps')
+        let diagnosticHistory = ["root"];
+
+        // DOM References
+        const unitPillsEl = document.getElementById("unit-pills");
+        const unitBannerEl = document.getElementById("unit-banner");
+        const bentoGridEl = document.getElementById("bento-grid");
+        const emptyStateEl = document.getElementById("empty-state");
+        const searchInput = document.getElementById("global-search");
+        const clearSearchBtn = document.getElementById("clear-search-btn");
+        const focusFilterBtn = document.getElementById("focus-filter-btn");
+        const diagnosticModal = document.getElementById("diagnostic-modal");
+        const diagnosticBody = document.getElementById("diagnostic-body");
+
+        // Total cards count
+        const totalCardsCount = syllabusData.reduce((sum, u) => sum + u.cards.length, 0);
+
+        // =========================================================================
+        // UTILITY FUNCTIONS
+        // =========================================================================
+        function saveMastery() {
+            localStorage.setItem("diffeq-mastered", JSON.stringify([...masteredCards]));
+            updateMasteryUI();
+        }
+
+        function updateMasteryUI() {
+            const count = masteredCards.size;
+            const pct = Math.round((count / totalCardsCount) * 100);
+            document.getElementById("mastery-text").textContent = `${count} / ${totalCardsCount}`;
+            document.getElementById("mastery-bar").style.width = `${pct}%`;
+            document.getElementById("mastery-text-mobile").textContent = `${count} / ${totalCardsCount}`;
+            document.getElementById("mastery-bar-mobile").style.width = `${pct}%`;
+        }
+
+        function toggleMastery(cardId) {
+            if (masteredCards.has(cardId)) {
+                masteredCards.delete(cardId);
+            } else {
+                masteredCards.add(cardId);
+                showToast("¡Tema marcado como Dominado!");
+            }
+            saveMastery();
+            renderWorkspace();
+        }
+
+        function setCardTab(cardId, tabName) {
+            activeCardTabs[cardId] = tabName;
+            renderWorkspace();
+        }
+
+        function copyLatex(encodedLatex, btnEl) {
+            const latex = decodeURIComponent(encodedLatex);
+            const ta = document.createElement("textarea");
+            ta.value = latex;
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand("copy");
+                showToast("¡Copiado al portapapeles en formato LaTeX!");
+                const origHTML = btnEl.innerHTML;
+                btnEl.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"></i><span class="text-emerald-700 dark:text-emerald-400 font-bold">¡Copiado!</span>`;
+                lucide.createIcons();
+                setTimeout(() => {
+                    btnEl.innerHTML = origHTML;
+                    lucide.createIcons();
+                }, 1600);
+            } catch (e) {
+                showToast("Error al copiar código LaTeX");
+            }
+            document.body.removeChild(ta);
+        }
+
+        let toastTimer;
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            document.getElementById("toast-message").textContent = msg;
+            toast.classList.remove("translate-y-24", "opacity-0");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add("translate-y-24", "opacity-0");
+            }, 2300);
+        }
+
+        // =========================================================================
+        // RENDER HORIZONTAL NAVIGATION PILLS
+        // =========================================================================
+        function renderUnitPills() {
+            const allActive = activeUnitId === "all" && searchQuery.trim() === "";
+            let html = `
+                <button 
+                    onclick="selectUnit('all')"
+                    class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                        allActive
+                        ? "bg-ink-900 dark:bg-cobalt-700 text-white shadow-xs"
+                        : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-cobalt-700/50"
+                    }"
+                >
+                    <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+                    <span>Todas las Unidades (${totalCardsCount})</span>
+                </button>
+            `;
+
+            html += syllabusData.map(u => {
+                const isSelected = activeUnitId === u.id && searchQuery.trim() === "";
+                const unitMastered = u.cards.filter(c => masteredCards.has(c.id)).length;
+                const isUnitComplete = unitMastered === u.cards.length;
+
+                return `
+                    <button 
+                        onclick="selectUnit('${u.id}')"
+                        class="shrink-0 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                            isSelected
+                            ? "bg-cobalt-700 text-white shadow-xs"
+                            : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-cobalt-700/50 hover:text-cobalt-700 dark:hover:text-cobalt-400"
+                        }"
+                    >
+                        <span>${u.shortTitle}</span>
+                        <span class="font-mono text-[10px] px-1.5 py-0.2 rounded-full ${
+                            isSelected
+                            ? "bg-white/20 text-white"
+                            : isUnitComplete
+                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                        }">
+                            ${unitMastered}/${u.cards.length}
+                        </span>
+                    </button>
+                `;
+            }).join("");
+
+            unitPillsEl.innerHTML = html;
+        }
+
+        // =========================================================================
+        // BUILD INTERACTIVE BENTO CARD WITH 3 INTERNAL TABS
+        // =========================================================================
+        function renderCard(card, unit) {
+            const currentTab = activeCardTabs[card.id] || "formulas";
+            const isMastered = masteredCards.has(card.id);
+
+            // Tab 1: Fórmulas & Requisitos
+            const formulasTabHTML = `
+                <div class="space-y-4">
+                    <!-- Quick Identification Callout -->
+                    <div class="p-3 rounded-xl bg-cobalt-50/80 dark:bg-cobalt-900/20 border border-cobalt-200/80 dark:border-cobalt-800/60 flex items-start gap-2.5">
+                        <i data-lucide="scan-search" class="w-4 h-4 text-cobalt-700 dark:text-cobalt-400 shrink-0 mt-0.5"></i>
+                        <div class="text-xs text-ink-900 dark:text-slate-200 leading-relaxed">
+                            <span class="font-bold text-cobalt-800 dark:text-cobalt-300">Criterio de Identificación:</span> ${card.identification}
+                        </div>
+                    </div>
+
+                    <!-- Prerequisites Checklist -->
+                    <div>
+                        <div class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1.5">
+                            <i data-lucide="list-checks" class="w-3.5 h-3.5 text-cobalt-700 dark:text-cobalt-400"></i>
+                            <span>Lo que necesitas antes y durante el proceso</span>
+                        </div>
+                        <ul class="space-y-1.5">
+                            ${card.prerequisites.map(req => `
+                                <li class="flex items-start gap-2 text-xs sm:text-[13px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-cobalt-700 dark:bg-cobalt-500 mt-1.5 shrink-0"></span>
+                                    <span>${req}</span>
+                                </li>
+                            `).join("")}
+                        </ul>
+                    </div>
+
+                    <!-- Mathematical Formulas with Copy LaTeX -->
+                    <div class="space-y-2.5">
+                        ${card.formulas.map(f => {
+                            const encoded = encodeURIComponent(f.latex);
+                            return `
+                                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-ink-950 border border-slate-200 dark:border-slate-800">
+                                    <div class="flex items-center justify-between gap-2 mb-1">
+                                        <span class="text-[11px] font-mono font-semibold text-slate-500 dark:text-slate-400">${f.label}</span>
+                                        <button 
+                                            onclick="copyLatex('${encoded}', this)"
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-cobalt-700 dark:hover:border-cobalt-500 text-[11px] font-mono font-medium text-slate-700 dark:text-slate-300 hover:text-cobalt-700 dark:hover:text-cobalt-400 shadow-2xs transition-all cursor-pointer"
+                                            title="Copiar código fuente LaTeX"
+                                        >
+                                            <i data-lucide="copy" class="w-3 h-3"></i>
+                                            <span>Copiar LaTeX</span>
+                                        </button>
+                                    </div>
+                                    <div class="text-ink-900 dark:text-slate-100 overflow-x-auto">
+                                        $$${f.latex}$$
+                                    </div>
+                                </div>
+                            `;
+                        }).join("")}
+                    </div>
+                </div>
+            `;
+
+            // Tab 2: Ejemplo Resuelto Paso a Paso
+            const exampleTabHTML = `
+                <div class="space-y-3.5">
+                    <div class="p-3.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                        <div class="text-[10px] font-mono font-bold uppercase tracking-wider text-cobalt-700 dark:text-cobalt-400 mb-1">Enunciado del Ejercicio</div>
+                        <div class="text-xs sm:text-sm font-medium text-ink-900 dark:text-white overflow-x-auto">
+                            $$${card.workedExample.statement}$$
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        ${card.workedExample.steps.map((step, idx) => `
+                            <div class="p-3 rounded-xl bg-white dark:bg-ink-950/80 border border-slate-200/90 dark:border-slate-800">
+                                <div class="flex items-start gap-2.5">
+                                    <span class="w-5 h-5 rounded-md bg-cobalt-700 text-white font-mono text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                                        ${idx + 1}
+                                    </span>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-xs font-medium text-slate-700 dark:text-slate-300">${step.text}</p>
+                                        <div class="mt-1 text-ink-900 dark:text-slate-100 overflow-x-auto">
+                                            $$${step.math}$$
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            `;
+
+            // Tab 3: Errores Comunes (Trampas de Examen)
+            const trapsTabHTML = `
+                <div class="space-y-3">
+                    <div class="p-3 rounded-xl bg-ambertech-50 dark:bg-ambertech-700/15 border border-ambertech-500/30 flex items-center gap-2.5">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-ambertech-600 dark:text-ambertech-500 shrink-0"></i>
+                        <span class="text-xs font-bold text-ambertech-700 dark:text-ambertech-400">
+                            Puntos críticos donde suelen perderse puntos en evaluaciones
+                        </span>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        ${card.traps.map((trap, i) => `
+                            <div class="p-3.5 rounded-xl bg-white dark:bg-ink-950/70 border border-ambertech-500/25 flex items-start gap-3">
+                                <span class="font-mono text-xs font-bold text-ambertech-600 dark:text-ambertech-500 bg-ambertech-100 dark:bg-ambertech-700/20 px-2 py-0.5 rounded shrink-0">
+                                    !0${i + 1}
+                                </span>
+                                <p class="text-xs sm:text-[13px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                                    ${trap}
+                                </p>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+            `;
+
+            return `
+                <article id="card-${card.id}" class="bg-white dark:bg-slate-900 border ${isMastered ? 'border-emerald-500/50 dark:border-emerald-600/50' : 'border-slate-200/90 dark:border-slate-800'} rounded-2xl shadow-xs hover:shadow-md transition-all flex flex-col overflow-hidden">
+                    
+                    <!-- Card Top Bar: Metadata & Mastery Toggle -->
+                    <div class="px-5 pt-4 pb-3 border-b border-slate-100 dark:border-slate-800/80 flex items-start justify-between gap-3">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-ink-900 text-white dark:bg-slate-800 dark:text-cobalt-400">
+                                    ${unit.code}
+                                </span>
+                                <span class="font-mono text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                    ${card.tag}
+                                </span>
+                            </div>
+                            <h3 class="text-base sm:text-lg font-extrabold text-ink-900 dark:text-white tracking-tight">
+                                ${card.title}
+                            </h3>
+                        </div>
+
+                        <!-- Mastery Checkbox Button -->
+                        <button 
+                            onclick="toggleMastery('${card.id}')"
+                            class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                                isMastered
+                                ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500/40 text-emerald-700 dark:text-emerald-400"
+                                : "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-ink-900 dark:hover:text-white"
+                            }"
+                            title="Marcar tema como dominado"
+                        >
+                            <i data-lucide="${isMastered ? 'check-circle-2' : 'circle'}" class="w-3.5 h-3.5 ${isMastered ? 'text-emerald-600 dark:text-emerald-400' : ''}"></i>
+                            <span class="hidden sm:inline">${isMastered ? 'Dominado' : 'Marcar'}</span>
+                        </button>
+                    </div>
+
+                    <!-- Internal 3-Tab Switcher -->
+                    <div class="px-5 pt-2.5 bg-slate-50/70 dark:bg-ink-950/40 border-b border-slate-200/80 dark:border-slate-800 flex items-center gap-1 overflow-x-auto no-scrollbar">
+                        <button 
+                            onclick="setCardTab('${card.id}', 'formulas')"
+                            class="px-3 py-2 text-xs font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                                currentTab === 'formulas'
+                                ? "border-cobalt-700 text-cobalt-700 dark:border-cobalt-500 dark:text-cobalt-400"
+                                : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                            }"
+                        >
+                            <i data-lucide="function-square" class="w-3.5 h-3.5"></i>
+                            <span>Fórmulas & Requisitos</span>
+                        </button>
+
+                        <button 
+                            onclick="setCardTab('${card.id}', 'example')"
+                            class="px-3 py-2 text-xs font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                                currentTab === 'example'
+                                ? "border-cobalt-700 text-cobalt-700 dark:border-cobalt-500 dark:text-cobalt-400"
+                                : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                            }"
+                        >
+                            <i data-lucide="footprints" class="w-3.5 h-3.5"></i>
+                            <span>Ejemplo Paso a Paso</span>
+                        </button>
+
+                        <button 
+                            onclick="setCardTab('${card.id}', 'traps')"
+                            class="px-3 py-2 text-xs font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                                currentTab === 'traps'
+                                ? "border-ambertech-600 text-ambertech-700 dark:border-ambertech-500 dark:text-ambertech-400"
+                                : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                            }"
+                        >
+                            <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+                            <span>Trampas de Examen</span>
+                        </button>
+                    </div>
+
+                    <!-- Tab Content Body -->
+                    <div class="p-5 flex-1">
+                        ${currentTab === 'formulas' ? formulasTabHTML : currentTab === 'example' ? exampleTabHTML : trapsTabHTML}
+                    </div>
+                </article>
+            `;
+        }
+
+        // =========================================================================
+        // MAIN WORKSPACE RENDERER
+        // =========================================================================
+        function renderWorkspace() {
+            renderUnitPills();
+            const q = searchQuery.trim().toLowerCase();
+
+            // Gather matching (unit, card) pairs
+            let filteredPairs = [];
+            syllabusData.forEach(unit => {
+                if (q === "" && activeUnitId !== "all" && unit.id !== activeUnitId) return;
+
+                unit.cards.forEach(card => {
+                    if (focusHideMastered && masteredCards.has(card.id)) return;
+
+                    if (q !== "") {
+                        const haystack = [
+                            unit.title,
+                            card.title,
+                            card.tag,
+                            card.identification,
+                            ...card.prerequisites,
+                            ...card.formulas.map(f => f.label + " " + f.latex),
+                            card.workedExample.statement,
+                            ...card.traps
+                        ].join(" ").toLowerCase();
+
+                        if (!haystack.includes(q)) return;
+                    }
+
+                    filteredPairs.push({ unit, card });
+                });
+            });
+
+            // Banner Header
+            if (q !== "") {
+                unitBannerEl.innerHTML = `
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
+                        <div>
+                            <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-cobalt-700 dark:text-cobalt-400">Búsqueda Global</span>
+                            <h2 class="text-xl sm:text-2xl font-extrabold text-ink-900 dark:text-white tracking-tight">
+                                ${filteredPairs.length} ${filteredPairs.length === 1 ? 'resultado' : 'resultados'} para "${searchQuery}"
+                            </h2>
+                        </div>
+                        ${focusHideMastered ? `<span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-ambertech-100 text-ambertech-700 dark:bg-ambertech-700/20 dark:text-ambertech-400">Filtro Enfoque Activo</span>` : ''}
+                    </div>
+                `;
+            } else if (activeUnitId === "all") {
+                unitBannerEl.innerHTML = `
+                    <div class="flex flex-wrap items-end justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+                        <div>
+                            <div class="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-cobalt-700 dark:text-cobalt-400 mb-1">
+                                <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                                <span>Workstation Completo • 6 Unidades</span>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-extrabold text-ink-900 dark:text-white tracking-tight">
+                                Sílabo Integral de Ecuaciones Diferenciales
+                            </h2>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
+                                Alterna entre las pestañas internas de cada ficha para ver fórmulas, ejemplos paso a paso y trampas de examen.
+                            </p>
+                        </div>
+                        ${focusHideMastered ? `<span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-ambertech-100 text-ambertech-700 dark:bg-ambertech-700/20 dark:text-ambertech-400">Mostrando solo temas pendientes</span>` : ''}
+                    </div>
+                `;
+            } else {
+                const currentUnit = syllabusData.find(u => u.id === activeUnitId);
+                unitBannerEl.innerHTML = `
+                    <div class="flex flex-wrap items-end justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
+                        <div>
+                            <div class="inline-flex items-center gap-2 mb-1">
+                                <span class="px-2 py-0.5 rounded bg-cobalt-700 text-white font-mono text-[11px] font-bold">${currentUnit.code}</span>
+                                <span class="text-xs font-mono text-slate-500 dark:text-slate-400">${currentUnit.cards.length} fichas técnicas</span>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-extrabold text-ink-900 dark:text-white tracking-tight">
+                                ${currentUnit.title}
+                            </h2>
+                            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-3xl">
+                                ${currentUnit.description}
+                            </p>
+                        </div>
+                        ${focusHideMastered ? `<span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-ambertech-100 text-ambertech-700 dark:bg-ambertech-700/20 dark:text-ambertech-400">Mostrando solo temas pendientes</span>` : ''}
+                    </div>
+                `;
+            }
+
+            // Grid or Empty State
+            if (filteredPairs.length === 0) {
+                bentoGridEl.innerHTML = "";
+                emptyStateEl.classList.remove("hidden");
+            } else {
+                emptyStateEl.classList.add("hidden");
+                bentoGridEl.innerHTML = filteredPairs.map(pair => renderCard(pair.card, pair.unit)).join("");
+            }
+
+            // Re-render Icons & KaTeX
+            lucide.createIcons();
+            if (window.renderMathInElement) {
+                renderMathInElement(bentoGridEl, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "$", right: "$", display: false }
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        // =========================================================================
+        // DIAGNOSTIC WIZARD LOGIC
+        // =========================================================================
+        function openDiagnostic() {
+            diagnosticHistory = ["root"];
+            renderDiagnosticStep();
+            diagnosticModal.classList.remove("hidden");
+            diagnosticModal.classList.add("flex");
+        }
+
+        function closeDiagnostic() {
+            diagnosticModal.classList.add("hidden");
+            diagnosticModal.classList.remove("flex");
+        }
+
+        function advanceDiagnostic(nextKey) {
+            diagnosticHistory.push(nextKey);
+            renderDiagnosticStep();
+        }
+
+        function backDiagnostic() {
+            if (diagnosticHistory.length > 1) {
+                diagnosticHistory.pop();
+                renderDiagnosticStep();
+            }
+        }
+
+        function jumpToRecommendedCard(cardId) {
+            closeDiagnostic();
+            // Find which unit owns cardId
+            const ownerUnit = syllabusData.find(u => u.cards.some(c => c.id === cardId));
+            if (ownerUnit) {
+                activeUnitId = ownerUnit.id;
+                searchQuery = "";
+                searchInput.value = "";
+                clearSearchBtn.classList.add("hidden");
+                if (focusHideMastered && masteredCards.has(cardId)) {
+                    focusHideMastered = false;
+                    updateFocusBtnUI();
+                }
+                renderWorkspace();
+
+                setTimeout(() => {
+                    const cardEl = document.getElementById(`card-${cardId}`);
+                    if (cardEl) {
+                        cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                        cardEl.classList.add("card-highlight");
+                        setTimeout(() => cardEl.classList.remove("card-highlight"), 2000);
+                    }
+                }, 80);
+            }
+        }
+
+        function renderDiagnosticStep() {
+            const currentNodeKey = diagnosticHistory[diagnosticHistory.length - 1];
+            const node = diagnosticTree[currentNodeKey];
+
+            const breadcrumbHTML = diagnosticHistory.length > 1 ? `
+                <button onclick="backDiagnostic()" class="inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-cobalt-700 dark:text-cobalt-400 hover:underline mb-2 cursor-pointer">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    <span>Paso anterior</span>
+                </button>
+            ` : '';
+
+            diagnosticBody.innerHTML = `
+                <div>
+                    ${breadcrumbHTML}
+                    <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+                        Paso ${diagnosticHistory.length}
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-ink-900 dark:text-white">
+                        ${node.question}
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        ${node.subtitle}
+                    </p>
+                </div>
+
+                <div class="space-y-2.5">
+                    ${node.options.map(opt => {
+                        if (opt.next) {
+                            return `
+                                <button 
+                                    onclick="advanceDiagnostic('${opt.next}')"
+                                    class="w-full text-left p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 hover:bg-cobalt-50 dark:hover:bg-cobalt-900/30 border border-slate-200 dark:border-slate-700 hover:border-cobalt-700 dark:hover:border-cobalt-500 transition-all flex items-center justify-between gap-3 group cursor-pointer"
+                                >
+                                    <div class="flex items-center gap-3">
+                                        ${opt.icon ? `<i data-lucide="${opt.icon}" class="w-4 h-4 text-cobalt-700 dark:text-cobalt-400 shrink-0"></i>` : ''}
+                                        <span class="text-xs sm:text-sm font-semibold text-ink-900 dark:text-slate-100 group-hover:text-cobalt-800 dark:group-hover:text-cobalt-300">
+                                            ${opt.label}
+                                        </span>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-cobalt-700 shrink-0"></i>
+                                </button>
+                            `;
+                        } else {
+                            // Leaf node: Diagnosis result!
+                            let targetCardTitle = "";
+                            let targetUnitCode = "";
+                            syllabusData.forEach(u => {
+                                const found = u.cards.find(c => c.id === opt.resultCardId);
+                                if (found) {
+                                    targetCardTitle = found.title;
+                                    targetUnitCode = u.code;
+                                }
+                            });
+
+                            return `
+                                <div class="p-4 rounded-xl bg-white dark:bg-ink-950 border border-slate-200 dark:border-slate-800 hover:border-cobalt-700 transition-all space-y-3">
+                                    <div class="text-xs sm:text-sm font-semibold text-ink-900 dark:text-slate-100">
+                                        ${opt.label}
+                                    </div>
+                                    <div class="p-3 rounded-lg bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div class="space-y-1">
+                                            <div class="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase text-emerald-700 dark:text-emerald-400">
+                                                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                                                <span>Método Recomendado (${targetUnitCode})</span>
+                                            </div>
+                                            <div class="text-sm font-extrabold text-ink-900 dark:text-white">${targetCardTitle}</div>
+                                            <p class="text-xs text-slate-600 dark:text-slate-400">${opt.reason}</p>
+                                        </div>
+                                        <button 
+                                            onclick="jumpToRecommendedCard('${opt.resultCardId}')"
+                                            class="shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-cobalt-700 hover:bg-cobalt-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                                        >
+                                            <span>Abrir Ficha</span>
+                                            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }).join("")}
+                </div>
+            `;
+
+            lucide.createIcons();
+        }
+
+        // =========================================================================
+        // EVENT LISTENERS & NAVIGATION
+        // =========================================================================
+        function selectUnit(unitId) {
+            activeUnitId = unitId;
+            if (searchQuery !== "") {
+                searchQuery = "";
+                searchInput.value = "";
+                clearSearchBtn.classList.add("hidden");
+            }
+            renderWorkspace();
+        }
+
+        function updateFocusBtnUI() {
+            const icon = document.getElementById("focus-icon");
+            if (focusHideMastered) {
+                focusFilterBtn.classList.add("bg-ambertech-50", "border-ambertech-500", "text-ambertech-700", "dark:bg-ambertech-700/20", "dark:text-ambertech-400");
+                icon.setAttribute("data-lucide", "eye-off");
+            } else {
+                focusFilterBtn.classList.remove("bg-ambertech-50", "border-ambertech-500", "text-ambertech-700", "dark:bg-ambertech-700/20", "dark:text-ambertech-400");
+                icon.setAttribute("data-lucide", "eye");
+            }
+            lucide.createIcons();
+        }
+
+        focusFilterBtn.addEventListener("click", () => {
+            focusHideMastered = !focusHideMastered;
+            updateFocusBtnUI();
+            renderWorkspace();
+            showToast(focusHideMastered ? "Modo Enfoque: ocultando temas dominados" : "Mostrando todos los temas");
+        });
+
+        searchInput.addEventListener("input", (e) => {
+            searchQuery = e.target.value;
+            clearSearchBtn.classList.toggle("hidden", searchQuery.length === 0);
+            renderWorkspace();
+        });
+
+        clearSearchBtn.addEventListener("click", () => {
+            searchQuery = "";
+            searchInput.value = "";
+            clearSearchBtn.classList.add("hidden");
+            renderWorkspace();
+        });
+
+        document.getElementById("reset-filters-btn").addEventListener("click", () => {
+            searchQuery = "";
+            searchInput.value = "";
+            clearSearchBtn.classList.add("hidden");
+            focusHideMastered = false;
+            updateFocusBtnUI();
+            activeUnitId = "all";
+            renderWorkspace();
+        });
+
+        // Keyboard shortcuts: Ctrl+K for Search, Escape to close Diagnostic Modal
+        window.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            }
+            if (e.key === "Escape" && !diagnosticModal.classList.contains("hidden")) {
+                closeDiagnostic();
+            }
+        });
+
+        // Diagnostic Modal Buttons
+        document.getElementById("open-diagnostic-btn").addEventListener("click", openDiagnostic);
+        document.getElementById("close-diagnostic-btn").addEventListener("click", closeDiagnostic);
+        document.getElementById("diagnostic-reset-btn").addEventListener("click", () => {
+            diagnosticHistory = ["root"];
+            renderDiagnosticStep();
+        });
+        diagnosticModal.addEventListener("click", (e) => {
+            if (e.target === diagnosticModal) closeDiagnostic();
+        });
+
+        // Theme Toggle (Defaults to High-Contrast Light Blueprint Mode)
+        document.getElementById("theme-toggle").addEventListener("click", () => {
+            const html = document.documentElement;
+            if (html.classList.contains("dark")) {
+                html.classList.remove("dark");
+                localStorage.setItem("diffeq-workstation-theme", "light");
+            } else {
+                html.classList.add("dark");
+                localStorage.setItem("diffeq-workstation-theme", "dark");
+            }
+        });
+
+        // Boot Application
+        window.addEventListener("DOMContentLoaded", () => {
+            const savedTheme = localStorage.getItem("diffeq-workstation-theme");
+            if (savedTheme === "dark") {
+                document.documentElement.classList.add("dark");
+            }
+            updateMasteryUI();
+            setTimeout(renderWorkspace, 40);
+        });
+    </script>
+</body>
+</html>
